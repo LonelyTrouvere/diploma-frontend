@@ -7,6 +7,7 @@ import { routeTree } from './routeTree.gen'
 
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
+import { ClerkProvider } from '@clerk/clerk-react'
 
 // Create a new router instance
 const router = createRouter({
@@ -25,13 +26,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
-// Render the app
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+
+if (!PUBLISHABLE_KEY) {
+  throw new Error('Missing Publishable Key')
+}
+
 const rootElement = document.getElementById('app')
 if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <RouterProvider router={router} />
+      <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl='/'>
+        <RouterProvider router={router} />
+      </ClerkProvider>
     </StrictMode>,
   )
 }
