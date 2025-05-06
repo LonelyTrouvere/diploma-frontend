@@ -17,7 +17,7 @@ const ROUTES = [
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div id="app__layout" className="flex">
-      <nav id="app__navigation" className="w-48 h-screen fixed shadow-2xl flex flex-col bg-blue-50">
+      <nav id="app__navigation" className="w-48 h-screen fixed shadow-2xl flex flex-col bg-fuchsia-50">
       <SignedOut>
         <NavDiv><SignInButton forceRedirectUrl='/groups'/></NavDiv>
         <NavDiv><SignUpButton forceRedirectUrl='/groups'/></NavDiv>

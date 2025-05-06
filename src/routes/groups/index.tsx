@@ -37,13 +37,13 @@ function GroupsPage() {
         <div className="flex gap-3 absolute top-0 right-0">
           <button
             onClick={() => console.log("kek")}
-            className="text-xl text-center rounded-2xl bg-blue-100 hover:bg-blue-300 px-4 py-2 cursor-pointer"
+            className="text-xl text-center rounded-2xl bg-fuchsia-100 hover:bg-fuchsia-300 px-4 py-2 cursor-pointer"
           >
             Доєднатись
           </button>
           <button
             onClick={handleOpenCreateModal}
-            className="text-xl text-center rounded-2xl bg-blue-100 hover:bg-blue-300 px-4 py-2 cursor-pointer"
+            className="text-xl text-center rounded-2xl bg-fuchsia-100 hover:bg-fuchsia-300 px-4 py-2 cursor-pointer"
           >
             Створити
           </button>
@@ -53,7 +53,7 @@ function GroupsPage() {
         {groups.map((group) => (
           <div
             key={group.id}
-            className="group-name h-16 rounded-xl text-xl flex justify-center content-evenly py-2 px-4 hover:bg-blue-200"
+            className="group-name h-16 rounded-xl text-xl flex justify-center content-evenly py-2 px-4 hover:bg-fuchsia-200"
           >
             {group.name}
           </div>
@@ -83,7 +83,7 @@ function GroupsPage() {
           </div>
           <button
             onClick={onCreateGroup}
-            className="w-32 text-xl text-center rounded-2xl bg-blue-100 hover:bg-blue-300 px-4 py-2 cursor-pointer"
+            className="w-32 text-xl text-center rounded-2xl bg-fuchsia-100 hover:bg-fuchsia-300 px-4 py-2 cursor-pointer"
             type="submit"
             disabled={!createName}
           >
