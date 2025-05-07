@@ -1,8 +1,11 @@
 import { login } from "@/api/users/login";
 import "./login.css";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Router, useNavigate } from "@tanstack/react-router";
 import { loginSchema } from "@/validation/login-form-schema";
 import { useState } from "react";
+import { useCurrentUser } from "@/utils/context/user-context";
+import { jwtDecode } from "jwt-decode";
+import type { User } from "@/api/users/entity";
 
 export const Route = createFileRoute("/login")({
   component: Login,
@@ -10,6 +13,8 @@ export const Route = createFileRoute("/login")({
 
 function Login() {
   const [errorFields, setErrorFields] = useState<string[]>([]);
+  const { setCurrentUser } = useCurrentUser();
+  const navigate = useNavigate();
 
   async function formAction(formData: FormData) {
     const formValues = loginSchema.safeParse(Object.fromEntries(formData));
@@ -18,7 +23,14 @@ function Login() {
       setErrorFields(Object.keys(formated));
     } else {
       setErrorFields([]);
-      await login(formValues.data);
+      const res = await login(formValues.data);
+      if (res.success) {
+        const decoded = jwtDecode<User>(res.data.token);
+        setCurrentUser(decoded);
+        navigate({ to: "/groups" });
+      } else {
+        setErrorFields(['name', 'password']);
+      }
     }
   }
 

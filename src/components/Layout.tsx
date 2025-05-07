@@ -1,6 +1,8 @@
 import "./Layout.css";
 import { Link, type ReactNode } from "@tanstack/react-router";
 import NavDiv from "./styled/NavDiv";
+import { useEffect } from "react";
+import { useCurrentUser } from "@/utils/context/user-context";
 
 const ROUTES_GUEST = [
   {
@@ -21,7 +23,12 @@ const ROUTES_USER = [
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
-  const routes = ROUTES_GUEST;
+  const { currentUser, fetchCurrentUser } = useCurrentUser();
+
+  useEffect(() => {
+    fetchCurrentUser();
+  }, []);
+  const routes = currentUser ? ROUTES_USER : ROUTES_GUEST;
 
   return (
     <div id="app__layout" className="flex">
