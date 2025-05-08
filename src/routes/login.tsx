@@ -47,7 +47,7 @@ function Login() {
         <span className="text-3xl font-semibold">Вітаємо!</span>
         <div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="name">Email: </label>
+            <label htmlFor="email">Email: </label>
             <input
               className={errorFields.includes("email") ? "error-field" : ""}
               type="text"
@@ -58,7 +58,7 @@ function Login() {
         </div>
         <div>
           <div className="flex flex-col gap-1">
-            <label htmlFor="name">Пароль: </label>
+            <label htmlFor="password">Пароль: </label>
             <input
               className={errorFields.includes("password") ? "error-field" : ""}
               type="password"

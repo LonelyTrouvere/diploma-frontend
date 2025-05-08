@@ -18,6 +18,7 @@ export const CurrentUserProvider = ({
   const fetchCurrentUser = async () => {
     let response = await getUser();
     if (response.success) {
+      console.log(response.data)
       setCurrentUser(response.data);
     } else {
       setCurrentUser(null);
