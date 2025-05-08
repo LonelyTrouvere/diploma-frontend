@@ -42,7 +42,33 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       },
     },
   ];
-  const routes = currentUser ? ROUTES_USER : ROUTES_GUEST;
+
+  const ROUTES_GROUP: Route[] = [
+    {
+      name: "Groups",
+      href: "/groups",
+    },
+    {
+      name: "Settings",
+      href: `/groups/${currentUser?.groups?.id}/settings`,
+    },
+    {
+      name: "Log out",
+      href: "/logout",
+      action: async () => {
+        const res = await logout();
+        if (res.success) {
+          setCurrentUser(null);
+          navigate({ to: "/" });
+        }
+      },
+    },
+  ];
+  const routes = currentUser?.groups
+    ? ROUTES_GROUP
+    : currentUser
+      ? ROUTES_USER
+      : ROUTES_GUEST;
 
   return (
     <div id="app__layout" className="flex">
