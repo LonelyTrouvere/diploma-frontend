@@ -1,6 +1,6 @@
 import { login } from "@/api/users/login";
 import "./login.css";
-import { createFileRoute, Router, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { loginSchema } from "@/validation/login-form-schema";
 import { useState } from "react";
 import { useCurrentUser } from "@/utils/context/user-context";

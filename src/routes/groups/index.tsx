@@ -1,9 +1,13 @@
 import "./page.css";
 import { getGroups } from "@/api/groups/get";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import Modal from "@mui/material/Modal";
 import { useState } from "react";
 import { postGroup } from "@/api/groups/post";
+import { useCurrentUser } from "@/utils/context/user-context";
+import { loginGroup } from "@/api/groups/login";
+import type { User } from "@/api/users/entity";
+import { jwtDecode } from "jwt-decode";
 
 export const Route = createFileRoute("/groups/")({
   component: GroupsPage,
@@ -17,8 +21,10 @@ export const Route = createFileRoute("/groups/")({
 
 function GroupsPage() {
   const { groups } = Route.useLoaderData();
+  const { setCurrentUser } = useCurrentUser();
   const [openCreateModal, setOpenCreateModal] = useState<boolean>(false);
   const [createName, setCreateName] = useState<string>("");
+  const navigate = useNavigate();
 
   const handleOpenCreateModal = () => setOpenCreateModal(true);
   const handleCloseCreateModal = () => setOpenCreateModal(false);
@@ -26,6 +32,15 @@ function GroupsPage() {
   const onCreateGroup = async () => {
     if (createName) {
       await postGroup({ name: createName });
+    }
+  };
+
+  const onLoginGroup = async (group: string) => {
+    const res = await loginGroup(group);
+    if (res.success) {
+      const decoded = jwtDecode<User>(res.data.token);
+      setCurrentUser(decoded);
+      navigate({ to: "/groups/$id", params: { id: group } });
     }
   };
 
@@ -51,12 +66,13 @@ function GroupsPage() {
       </div>
       <div className="grid grid-cols-3 gap-5 w-[100%]">
         {groups.map((group) => (
-          <div
-            key={group.id}
-            className="group-name h-16 rounded-xl text-xl flex justify-center content-evenly py-2 px-4 hover:bg-fuchsia-200"
-          >
-            {group.name}
-          </div>
+            <div
+              key={group.id}
+              className="group-name h-16 rounded-xl text-xl flex justify-center content-evenly py-2 px-4 hover:bg-fuchsia-200"
+              onClick={() => onLoginGroup(group.id)}
+            >
+              {group.name}
+            </div>
         ))}
       </div>
       <Modal
