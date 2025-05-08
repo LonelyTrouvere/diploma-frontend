@@ -5,6 +5,7 @@ import { updateGroupSchema } from "@/validation/update-group-schema";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { getGroupParticipants } from "@/api/users/get-participants";
 import {
+  IconButton,
   Paper,
   styled,
   Table,
@@ -14,30 +15,49 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import AcceptIcon from "@mui/icons-material/Done";
+import { getJoinRequests } from "@/api/groups/joinRequestsList";
+import { acceptRequest } from "@/api/groups/accept-request";
+import { declineRequest } from "@/api/groups/decline-request";
 
 export const Route = createFileRoute("/groups/$id/settings")({
   component: RouteComponent,
   loader: async () => {
     const participants = await getGroupParticipants();
-    if (participants.success) {
-      return {
-        participants: participants.data,
-      };
-    } else {
-      throw notFound();
+    try {
+      const joinRequests = await getJoinRequests();
+      if (participants.success) {
+        return {
+          participants: participants.data,
+          joinRequests: joinRequests.success ? joinRequests.data : undefined,
+        };
+      } else {
+        throw notFound();
+      }
+    } catch (e) {
+      if (participants.success) {
+        return {
+          participants: participants.data,
+          joinRequests: undefined,
+        };
+      } else {
+        throw notFound();
+      }
     }
   },
 });
 
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  '&:nth-of-type(odd)': {
-    backgroundColor: '#fbf3fd',
+const StyledTableRow = styled(TableRow)(() => ({
+  "&:nth-of-type(odd)": {
+    backgroundColor: "#fbf3fd",
   },
 }));
 
 function RouteComponent() {
-  const { participants } = Route.useLoaderData();
+  const { participants, joinRequests } = Route.useLoaderData();
   const { currentUser, fetchCurrentUser } = useCurrentUser();
+  const navigate = Route.useNavigate();
 
   async function formAction(formData: FormData) {
     const formValues = updateGroupSchema.safeParse(
@@ -48,6 +68,26 @@ function RouteComponent() {
       if (res.success) {
         await fetchCurrentUser();
       }
+    }
+  }
+
+  async function onAccept(userId: string) {
+    const res = await acceptRequest({
+      userId,
+      groupId: currentUser?.groups?.id as string,
+    });
+    if (res.success) {
+      navigate({ to: `/groups/${currentUser?.groups?.id}/settings` });
+    }
+  }
+
+  async function onDecline(userId: string) {
+    const res = await declineRequest({
+      userId,
+      groupId: currentUser?.groups?.id as string,
+    });
+    if (res.success) {
+      navigate({ to: `/groups/${currentUser?.groups?.id}/settings` });
     }
   }
 
@@ -118,9 +158,47 @@ function RouteComponent() {
             </Table>
           </TableContainer>
         </div>
-        <div className="w-[50%] flex flex-col gap-4">
-          <span className="text-3xl font-semibold">Запити на приєднання</span>
-        </div>
+        {joinRequests && (
+          <div className="w-[50%] flex flex-col gap-4">
+            <span className="text-3xl font-semibold">Запити на приєднання</span>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <StyledTableRow>
+                    <TableCell>Ім'я</TableCell>
+                    <TableCell>Email</TableCell>
+                    <TableCell>Дата запиту</TableCell>
+                    <TableCell>Опції</TableCell>
+                  </StyledTableRow>
+                </TableHead>
+                <TableBody>
+                  {joinRequests.map((request) => (
+                    <TableRow key={request.id}>
+                      <TableCell>{request.name}</TableCell>
+                      <TableCell>{request.email}</TableCell>
+                      <TableCell>
+                        {" "}
+                        {new Date(request.joined).toLocaleDateString("uk-UA", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        })}
+                      </TableCell>
+                      <TableCell>
+                        <IconButton onClick={() => onAccept(request.id)}>
+                          <AcceptIcon />
+                        </IconButton>
+                        <IconButton onClick={() => onDecline(request.id)}>
+                          <CloseIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </div>
+        )}
       </div>
     </div>
   );
