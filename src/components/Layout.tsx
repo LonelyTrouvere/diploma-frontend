@@ -1,33 +1,47 @@
 import "./Layout.css";
-import { Link, type ReactNode } from "@tanstack/react-router";
+import { Link, useNavigate, type ReactNode } from "@tanstack/react-router";
 import NavDiv from "./styled/NavDiv";
 import { useEffect } from "react";
 import { useCurrentUser } from "@/utils/context/user-context";
-
-const ROUTES_GUEST = [
-  {
-    name: "Login",
-    href: "/login",
-  },
-  {
-    name: "Sign up",
-    href: "/signup",
-  },
-];
-
-const ROUTES_USER = [
-  {
-    name: "Groups",
-    href: "/groups",
-  },
-];
+import { logout } from "@/api/users/logout";
+import type { Route } from "@/utils/types/route";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
-  const { currentUser, fetchCurrentUser } = useCurrentUser();
+  const navigate = useNavigate();
+  const { currentUser, fetchCurrentUser, setCurrentUser } = useCurrentUser();
 
   useEffect(() => {
     fetchCurrentUser();
   }, []);
+
+  const ROUTES_GUEST: Route[] = [
+    {
+      name: "Login",
+      href: "/login",
+    },
+    {
+      name: "Sign up",
+      href: "/signup",
+    },
+  ];
+
+  const ROUTES_USER: Route[] = [
+    {
+      name: "Groups",
+      href: "/groups",
+    },
+    {
+      name: "Log out",
+      href: "/logout",
+      action: async () => {
+        const res = await logout();
+        if (res.success) {
+          setCurrentUser(null);
+          navigate({ to: "/" });
+        }
+      },
+    },
+  ];
   const routes = currentUser ? ROUTES_USER : ROUTES_GUEST;
 
   return (
@@ -36,11 +50,26 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         id="app__navigation"
         className="w-48 h-screen fixed shadow-2xl flex flex-col bg-fuchsia-50"
       >
-        {routes.map((route, index) => (
-          <Link to={route.href}>
-            <NavDiv key={index}>{route.name}</NavDiv>
-          </Link>
-        ))}
+        {routes.map((route, index) => {
+          if (route.action) {
+            return (
+              <NavDiv>
+                <div
+                  className="w-[100%] h-[100%] flex justify-center content-center"
+                  onClick={route.action}
+                >
+                  <span>{route.name}</span>
+                </div>
+              </NavDiv>
+            );
+          } else {
+            return (
+              <Link to={route.href}>
+                <NavDiv key={index}>{route.name}</NavDiv>
+              </Link>
+            );
+          }
+        })}
       </nav>
       <div className="w-48"></div>
       <div id="app__content" className="h-fit w-[100%] px-12 py-10">
