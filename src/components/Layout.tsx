@@ -58,7 +58,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   className="w-[100%] h-[100%] flex justify-center content-center"
                   onClick={route.action}
                 >
-                  <span>{route.name}</span>
+                  <span className="action-span">{route.name}</span>
                 </div>
               </NavDiv>
             );
