@@ -49,6 +49,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       href: "/groups",
     },
     {
+      name: "Main",
+      href: `/groups/${currentUser?.groups?.id}`,
+    },
+    {
       name: "Settings",
       href: `/groups/${currentUser?.groups?.id}/settings`,
     },
