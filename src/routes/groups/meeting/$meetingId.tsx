@@ -16,6 +16,7 @@ export const Route = createFileRoute("/groups/meeting/$meetingId")({
 });
 
 function RouteComponent() {
+  const navigate = Route.useNavigate();
   const { meetingId } = Route.useParams();
   const [call, setCall] = useState<Call>();
   const client = useStreamVideoClient();
@@ -47,7 +48,7 @@ function RouteComponent() {
       <StreamCall call={call}>
         <StreamTheme className="space-y-3">
           <SpeakerLayout />
-          <CallControls />
+          <CallControls onLeave={() => navigate({to: '/groups'})} />
         </StreamTheme>
       </StreamCall>
     </div>
