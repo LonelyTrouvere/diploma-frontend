@@ -83,7 +83,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         {routes.map((route, index) => {
           if (route.action) {
             return (
-              <NavDiv>
+              <NavDiv key={route.name}>
                 <div
                   className="w-[100%] h-[100%] flex justify-center content-center"
                   onClick={route.action}
@@ -94,7 +94,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             );
           } else {
             return (
-              <Link to={route.href}>
+              <Link to={route.href} key={route.name}>
                 <NavDiv key={index}>{route.name}</NavDiv>
               </Link>
             );

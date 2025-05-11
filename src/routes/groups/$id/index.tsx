@@ -54,7 +54,7 @@ function RouteComponent() {
   return (
     <div className="w-[100%] px-6">
       <div className="flex justify-between mb-8">
-        <span className="text-3xl font-semibold">Налаштування</span>
+        <span className="text-3xl font-semibold">Список тем</span>
         {currentUser?.groups_to_users?.role !== USER_ROLE.participant && (
           <button
             className="text-xl text-center rounded-2xl bg-fuchsia-100 hover:bg-fuchsia-300 px-4 py-2 cursor-pointer"
@@ -102,7 +102,6 @@ function RouteComponent() {
                 className={errorFields.includes("name") ? "error-field" : ""}
                 type="text"
                 placeholder="Введіть..."
-                onChange={(e) => console.log("lol")}
               />
             </div>
           </div>
