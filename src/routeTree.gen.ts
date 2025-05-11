@@ -16,6 +16,7 @@ import { Route as LoginImport } from './routes/login'
 import { Route as IndexImport } from './routes/index'
 import { Route as GroupsIndexImport } from './routes/groups/index'
 import { Route as GroupsIdIndexImport } from './routes/groups/$id/index'
+import { Route as GroupsMeetingMeetingIdImport } from './routes/groups/meeting/$meetingId'
 import { Route as GroupsIdSettingsImport } from './routes/groups/$id/settings'
 import { Route as GroupsIdTopicIdImport } from './routes/groups/$id/$topicId'
 
@@ -48,6 +49,12 @@ const GroupsIndexRoute = GroupsIndexImport.update({
 const GroupsIdIndexRoute = GroupsIdIndexImport.update({
   id: '/groups/$id/',
   path: '/groups/$id/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const GroupsMeetingMeetingIdRoute = GroupsMeetingMeetingIdImport.update({
+  id: '/groups/meeting/$meetingId',
+  path: '/groups/meeting/$meetingId',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -109,6 +116,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GroupsIdSettingsImport
       parentRoute: typeof rootRoute
     }
+    '/groups/meeting/$meetingId': {
+      id: '/groups/meeting/$meetingId'
+      path: '/groups/meeting/$meetingId'
+      fullPath: '/groups/meeting/$meetingId'
+      preLoaderRoute: typeof GroupsMeetingMeetingIdImport
+      parentRoute: typeof rootRoute
+    }
     '/groups/$id/': {
       id: '/groups/$id/'
       path: '/groups/$id'
@@ -128,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/groups': typeof GroupsIndexRoute
   '/groups/$id/$topicId': typeof GroupsIdTopicIdRoute
   '/groups/$id/settings': typeof GroupsIdSettingsRoute
+  '/groups/meeting/$meetingId': typeof GroupsMeetingMeetingIdRoute
   '/groups/$id': typeof GroupsIdIndexRoute
 }
 
@@ -138,6 +153,7 @@ export interface FileRoutesByTo {
   '/groups': typeof GroupsIndexRoute
   '/groups/$id/$topicId': typeof GroupsIdTopicIdRoute
   '/groups/$id/settings': typeof GroupsIdSettingsRoute
+  '/groups/meeting/$meetingId': typeof GroupsMeetingMeetingIdRoute
   '/groups/$id': typeof GroupsIdIndexRoute
 }
 
@@ -149,6 +165,7 @@ export interface FileRoutesById {
   '/groups/': typeof GroupsIndexRoute
   '/groups/$id/$topicId': typeof GroupsIdTopicIdRoute
   '/groups/$id/settings': typeof GroupsIdSettingsRoute
+  '/groups/meeting/$meetingId': typeof GroupsMeetingMeetingIdRoute
   '/groups/$id/': typeof GroupsIdIndexRoute
 }
 
@@ -161,6 +178,7 @@ export interface FileRouteTypes {
     | '/groups'
     | '/groups/$id/$topicId'
     | '/groups/$id/settings'
+    | '/groups/meeting/$meetingId'
     | '/groups/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -170,6 +188,7 @@ export interface FileRouteTypes {
     | '/groups'
     | '/groups/$id/$topicId'
     | '/groups/$id/settings'
+    | '/groups/meeting/$meetingId'
     | '/groups/$id'
   id:
     | '__root__'
@@ -179,6 +198,7 @@ export interface FileRouteTypes {
     | '/groups/'
     | '/groups/$id/$topicId'
     | '/groups/$id/settings'
+    | '/groups/meeting/$meetingId'
     | '/groups/$id/'
   fileRoutesById: FileRoutesById
 }
@@ -190,6 +210,7 @@ export interface RootRouteChildren {
   GroupsIndexRoute: typeof GroupsIndexRoute
   GroupsIdTopicIdRoute: typeof GroupsIdTopicIdRoute
   GroupsIdSettingsRoute: typeof GroupsIdSettingsRoute
+  GroupsMeetingMeetingIdRoute: typeof GroupsMeetingMeetingIdRoute
   GroupsIdIndexRoute: typeof GroupsIdIndexRoute
 }
 
@@ -200,6 +221,7 @@ const rootRouteChildren: RootRouteChildren = {
   GroupsIndexRoute: GroupsIndexRoute,
   GroupsIdTopicIdRoute: GroupsIdTopicIdRoute,
   GroupsIdSettingsRoute: GroupsIdSettingsRoute,
+  GroupsMeetingMeetingIdRoute: GroupsMeetingMeetingIdRoute,
   GroupsIdIndexRoute: GroupsIdIndexRoute,
 }
 
@@ -219,6 +241,7 @@ export const routeTree = rootRoute
         "/groups/",
         "/groups/$id/$topicId",
         "/groups/$id/settings",
+        "/groups/meeting/$meetingId",
         "/groups/$id/"
       ]
     },
@@ -239,6 +262,9 @@ export const routeTree = rootRoute
     },
     "/groups/$id/settings": {
       "filePath": "groups/$id/settings.tsx"
+    },
+    "/groups/meeting/$meetingId": {
+      "filePath": "groups/meeting/$meetingId.tsx"
     },
     "/groups/$id/": {
       "filePath": "groups/$id/index.tsx"

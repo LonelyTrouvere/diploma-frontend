@@ -7,18 +7,22 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SendIcon from "@mui/icons-material/Send";
+import CallIcon from "@mui/icons-material/Call";
 import { createCommentSchema } from "@/validation/create-comment";
 import { postComment } from "@/api/comments/post";
 import { deleteTopic } from "@/api/topics/delete";
+import { useStreamVideoClient } from "@stream-io/video-react-sdk";
+import { getGroupParticipants } from "@/api/users/get-participants";
 
 export const Route = createFileRoute("/groups/$id/$topicId")({
   component: RouteComponent,
   loader: async (data) => {
     const topic = await getTopic(data.params.topicId);
-    if (!topic.success) {
+    const participants = await getGroupParticipants();
+    if (!topic.success || !participants.success) {
       throw notFound();
     }
-    return { topic: topic.data };
+    return { topic: topic.data, participants: participants.data };
   },
 });
 
@@ -31,9 +35,10 @@ const StyledIconButton = styled(IconButton)(() => ({
 }));
 
 function RouteComponent() {
-  const { topic } = Route.useLoaderData();
+  const { topic, participants } = Route.useLoaderData();
   const { currentUser } = useCurrentUser();
   const navigate = Route.useNavigate();
+  const client = useStreamVideoClient();
 
   async function formAction(formData: FormData) {
     const formValues = createCommentSchema.safeParse(
@@ -54,13 +59,32 @@ function RouteComponent() {
   }
 
   async function onDelete() {
-          const res = await deleteTopic(topic.id);
-      if (res.success) {
-        navigate({
-          to: "/groups/$id",
-          params: { id: currentUser?.groups?.id },
-        });
-      }
+    const res = await deleteTopic(topic.id);
+    if (res.success) {
+      navigate({
+        to: "/groups/$id",
+        params: { id: currentUser?.groups?.id },
+      });
+    }
+  }
+
+  async function onCreateCall() {
+    if (!client) {
+      return;
+    }
+
+    const id = crypto.randomUUID();
+    const call = client.call("default", id);
+    await call.getOrCreate({
+      data: {
+        members: participants.map((user) => ({
+          user_id: user.id,
+          role: user.role,
+        })),
+      },
+    });
+
+    navigate({ to: "/groups/meeting/$meetingId", params: { meetingId: id } });
   }
 
   return (
@@ -72,6 +96,9 @@ function RouteComponent() {
             {" "}
             <IconButton>
               <EditIcon />
+            </IconButton>
+            <IconButton onClick={onCreateCall}>
+              <CallIcon />
             </IconButton>
             <IconButton onClick={onDelete}>
               <DeleteIcon />

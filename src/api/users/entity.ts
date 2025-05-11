@@ -4,6 +4,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  token: string;
   groups?: Group;
   groups_to_users?: GroupToUserConnection;
 }
