@@ -3,7 +3,7 @@ import { USER_ROLE } from "@/api/groups/entity";
 import { getTopic } from "@/api/topics/get";
 import { useCurrentUser } from "@/utils/context/user-context";
 import { IconButton, Modal, Paper, styled } from "@mui/material";
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SendIcon from "@mui/icons-material/Send";
@@ -16,6 +16,11 @@ import { getGroupParticipants } from "@/api/users/get-participants";
 import { useState } from "react";
 import { updateTopic } from "@/api/topics/update";
 import { updateTopicSchema } from "@/validation/update-topic-schema";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { createMeetingSchema } from "@/validation/create-meeting";
 
 export const Route = createFileRoute("/groups/$id/$topicId")({
   component: RouteComponent,
@@ -43,10 +48,14 @@ function RouteComponent() {
   const navigate = Route.useNavigate();
   const client = useStreamVideoClient();
   const [openUpdateTopic, setOpenUpdateTopic] = useState<boolean>(false);
+  const [openCreateMeeting, setOpenCreateMeeting] = useState<boolean>(false);
   const [errorFields, setErrorFields] = useState<string[]>([]);
 
   const handleOpenUpdateTopic = () => setOpenUpdateTopic(true);
   const handleCloseUpdateTopuc = () => setOpenUpdateTopic(false);
+
+  const handleOpenCreateMeeting = () => setOpenCreateMeeting(true);
+  const handleCloseCreateMeeting = () => setOpenCreateMeeting(false);
 
   async function commentFormAction(formData: FormData) {
     const formValues = createCommentSchema.safeParse(
@@ -77,7 +86,9 @@ function RouteComponent() {
       setErrorFields([]);
       const res = await updateTopic({
         id: topic.id,
-        description: formValues.data.description ? formValues.data.description : undefined,
+        description: formValues.data.description
+          ? formValues.data.description
+          : undefined,
         name: formValues.data.name ? formValues.data.name : undefined,
       });
       if (res.success) {
@@ -92,6 +103,44 @@ function RouteComponent() {
     }
   }
 
+  async function createMeetingFormAction(formData: FormData) {
+    const formValues = createMeetingSchema.safeParse(
+      Object.fromEntries(formData)
+    );
+    console.log(formValues);
+    if (formValues.success) {
+      if (!client) {
+        return;
+      }
+
+      const id = crypto.randomUUID();
+      const call = client.call("default", id);
+      await call.getOrCreate({
+        data: {
+          members: participants.map((user) => ({
+            user_id: user.id,
+            role: user.role,
+          })),
+        },
+      });
+
+      const res = await updateTopic({
+        id: topic.id,
+        meetingId: id,
+        meetingFirstDate: new Date(formValues.data.dateTime).toISOString(),
+        recurring: formValues.data.recurring,
+      });
+
+      if (res.success) {
+        setOpenCreateMeeting(false);
+        navigate({
+          to: "/groups/$id/$topicId",
+          params: { id: currentUser?.groups?.id, topicId: topic.id },
+        });
+      }
+    }
+  }
+
   async function onDelete() {
     const res = await deleteTopic(topic.id);
     if (res.success) {
@@ -100,25 +149,6 @@ function RouteComponent() {
         params: { id: currentUser?.groups?.id },
       });
     }
-  }
-
-  async function onCreateCall() {
-    if (!client) {
-      return;
-    }
-
-    const id = crypto.randomUUID();
-    const call = client.call("default", id);
-    await call.getOrCreate({
-      data: {
-        members: participants.map((user) => ({
-          user_id: user.id,
-          role: user.role,
-        })),
-      },
-    });
-
-    navigate({ to: "/groups/meeting/$meetingId", params: { meetingId: id } });
   }
 
   return (
@@ -131,7 +161,7 @@ function RouteComponent() {
             <IconButton onClick={handleOpenUpdateTopic}>
               <EditIcon />
             </IconButton>
-            <IconButton onClick={onCreateCall}>
+            <IconButton onClick={handleOpenCreateMeeting}>
               <CallIcon />
             </IconButton>
             <IconButton onClick={onDelete}>
@@ -143,6 +173,30 @@ function RouteComponent() {
       <div className="pl-4 w-[60%] mb-8">
         <span className="text-xl/relaxed">
           {topic.description ?? "No description provided"}
+          {topic.meetingId && (
+            <>
+              <br />
+              <br />
+              <Link
+                to="/groups/meeting/$meetingId"
+                params={{ meetingId: topic.meetingId }}
+              >
+                <span className="text-blue-700 underline">
+                  Мітинг заплановано на{" "}
+                  {new Date(
+                    topic.meetingFirstDate as string
+                  ).toLocaleDateString("uk-UA", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })}
+                </span>
+              </Link>
+            </>
+          )}
         </span>
       </div>
       <Paper className="w-[70%] flex flex-col">
@@ -214,6 +268,37 @@ function RouteComponent() {
             type="submit"
           >
             Ок
+          </button>
+        </form>
+      </Modal>
+      <Modal open={openCreateMeeting} onClose={handleCloseCreateMeeting}>
+        <form
+          id="group-page__create"
+          className="bg-white absolute m-auto rounded-md flex flex-col gap-5 px-6 py-4 w-2xl"
+          action={createMeetingFormAction}
+        >
+          <span className="text-3xl font-semibold">Параметри зустрічі</span>
+          <div>
+            <div className="flex gap-3 content-center">
+              <input name="recurring" type="checkbox" />
+              <label htmlFor="recurring">Зустрі повторюється</label>
+            </div>
+          </div>
+          <div>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="dateTime">Дата зустрічі: </label>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DemoContainer components={["DateTimePicker"]}>
+                  <DateTimePicker name="dateTime" />
+                </DemoContainer>
+              </LocalizationProvider>
+            </div>
+          </div>
+          <button
+            className="w-32 text-xl text-center rounded-2xl bg-fuchsia-100 hover:bg-fuchsia-300 px-4 py-2 cursor-pointer"
+            type="submit"
+          >
+            Створити
           </button>
         </form>
       </Modal>
