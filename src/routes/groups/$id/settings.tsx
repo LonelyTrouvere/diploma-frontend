@@ -92,7 +92,7 @@ function RouteComponent() {
   }
 
   return (
-    <div className="w-[100%] px-6">
+    <div className="w-[100%] px-16 py-10">
       <span className="text-3xl font-semibold">Налаштування</span>
       <form
         action={formAction}

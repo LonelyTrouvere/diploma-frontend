@@ -52,7 +52,7 @@ function RouteComponent() {
   }
 
   return (
-    <div className="w-[100%] px-6">
+    <div className="w-[100%] px-16 py-10">
       <div className="flex justify-between mb-8">
         <span className="text-3xl font-semibold">Список тем</span>
         {currentUser?.groups_to_users?.role !== USER_ROLE.participant && (

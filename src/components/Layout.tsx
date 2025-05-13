@@ -53,6 +53,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       href: `/groups/${currentUser?.groups?.id}`,
     },
     {
+      name: "Chat",
+      href: `/groups/${currentUser?.groups?.id}/chat`
+    },
+    {
       name: "Settings",
       href: `/groups/${currentUser?.groups?.id}/settings`,
     },
@@ -102,7 +106,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         })}
       </nav>
       <div className="w-48"></div>
-      <div id="app__content" className="h-fit w-[100%] px-12 py-10">
+      <div id="app__content" className="h-fit w-[100%]">
         {children}
       </div>
     </div>
