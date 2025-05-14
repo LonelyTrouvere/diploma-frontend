@@ -19,6 +19,7 @@ import { Route as GroupsIdIndexImport } from './routes/groups/$id/index'
 import { Route as GroupsMeetingMeetingIdImport } from './routes/groups/meeting/$meetingId'
 import { Route as GroupsIdSettingsImport } from './routes/groups/$id/settings'
 import { Route as GroupsIdChatImport } from './routes/groups/$id/chat'
+import { Route as GroupsIdCalendarImport } from './routes/groups/$id/calendar'
 import { Route as GroupsIdTopicIdImport } from './routes/groups/$id/$topicId'
 
 // Create/Update Routes
@@ -71,6 +72,12 @@ const GroupsIdChatRoute = GroupsIdChatImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const GroupsIdCalendarRoute = GroupsIdCalendarImport.update({
+  id: '/groups/$id/calendar',
+  path: '/groups/$id/calendar',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const GroupsIdTopicIdRoute = GroupsIdTopicIdImport.update({
   id: '/groups/$id/$topicId',
   path: '/groups/$id/$topicId',
@@ -116,6 +123,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GroupsIdTopicIdImport
       parentRoute: typeof rootRoute
     }
+    '/groups/$id/calendar': {
+      id: '/groups/$id/calendar'
+      path: '/groups/$id/calendar'
+      fullPath: '/groups/$id/calendar'
+      preLoaderRoute: typeof GroupsIdCalendarImport
+      parentRoute: typeof rootRoute
+    }
     '/groups/$id/chat': {
       id: '/groups/$id/chat'
       path: '/groups/$id/chat'
@@ -155,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/groups': typeof GroupsIndexRoute
   '/groups/$id/$topicId': typeof GroupsIdTopicIdRoute
+  '/groups/$id/calendar': typeof GroupsIdCalendarRoute
   '/groups/$id/chat': typeof GroupsIdChatRoute
   '/groups/$id/settings': typeof GroupsIdSettingsRoute
   '/groups/meeting/$meetingId': typeof GroupsMeetingMeetingIdRoute
@@ -167,6 +182,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/groups': typeof GroupsIndexRoute
   '/groups/$id/$topicId': typeof GroupsIdTopicIdRoute
+  '/groups/$id/calendar': typeof GroupsIdCalendarRoute
   '/groups/$id/chat': typeof GroupsIdChatRoute
   '/groups/$id/settings': typeof GroupsIdSettingsRoute
   '/groups/meeting/$meetingId': typeof GroupsMeetingMeetingIdRoute
@@ -180,6 +196,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/groups/': typeof GroupsIndexRoute
   '/groups/$id/$topicId': typeof GroupsIdTopicIdRoute
+  '/groups/$id/calendar': typeof GroupsIdCalendarRoute
   '/groups/$id/chat': typeof GroupsIdChatRoute
   '/groups/$id/settings': typeof GroupsIdSettingsRoute
   '/groups/meeting/$meetingId': typeof GroupsMeetingMeetingIdRoute
@@ -194,6 +211,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/groups'
     | '/groups/$id/$topicId'
+    | '/groups/$id/calendar'
     | '/groups/$id/chat'
     | '/groups/$id/settings'
     | '/groups/meeting/$meetingId'
@@ -205,6 +223,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/groups'
     | '/groups/$id/$topicId'
+    | '/groups/$id/calendar'
     | '/groups/$id/chat'
     | '/groups/$id/settings'
     | '/groups/meeting/$meetingId'
@@ -216,6 +235,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/groups/'
     | '/groups/$id/$topicId'
+    | '/groups/$id/calendar'
     | '/groups/$id/chat'
     | '/groups/$id/settings'
     | '/groups/meeting/$meetingId'
@@ -229,6 +249,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   GroupsIndexRoute: typeof GroupsIndexRoute
   GroupsIdTopicIdRoute: typeof GroupsIdTopicIdRoute
+  GroupsIdCalendarRoute: typeof GroupsIdCalendarRoute
   GroupsIdChatRoute: typeof GroupsIdChatRoute
   GroupsIdSettingsRoute: typeof GroupsIdSettingsRoute
   GroupsMeetingMeetingIdRoute: typeof GroupsMeetingMeetingIdRoute
@@ -241,6 +262,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   GroupsIndexRoute: GroupsIndexRoute,
   GroupsIdTopicIdRoute: GroupsIdTopicIdRoute,
+  GroupsIdCalendarRoute: GroupsIdCalendarRoute,
   GroupsIdChatRoute: GroupsIdChatRoute,
   GroupsIdSettingsRoute: GroupsIdSettingsRoute,
   GroupsMeetingMeetingIdRoute: GroupsMeetingMeetingIdRoute,
@@ -262,6 +284,7 @@ export const routeTree = rootRoute
         "/signup",
         "/groups/",
         "/groups/$id/$topicId",
+        "/groups/$id/calendar",
         "/groups/$id/chat",
         "/groups/$id/settings",
         "/groups/meeting/$meetingId",
@@ -282,6 +305,9 @@ export const routeTree = rootRoute
     },
     "/groups/$id/$topicId": {
       "filePath": "groups/$id/$topicId.tsx"
+    },
+    "/groups/$id/calendar": {
+      "filePath": "groups/$id/calendar.tsx"
     },
     "/groups/$id/chat": {
       "filePath": "groups/$id/chat.tsx"

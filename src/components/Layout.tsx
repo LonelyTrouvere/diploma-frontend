@@ -54,7 +54,11 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     },
     {
       name: "Chat",
-      href: `/groups/${currentUser?.groups?.id}/chat`
+      href: `/groups/${currentUser?.groups?.id}/chat`,
+    },
+    {
+      name: "Calendar",
+      href: `/groups/${currentUser?.groups?.id}/calendar`,
     },
     {
       name: "Settings",
