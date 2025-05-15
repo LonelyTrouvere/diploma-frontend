@@ -1,3 +1,5 @@
+import type { Event } from "../events/entity";
+
 export interface Topic {
   id: string;
   name: string;
@@ -5,6 +7,5 @@ export interface Topic {
   created: string;
   groupId: string;
   meetingId?: string;
-  recurring?: boolean;
-  meetingFirstDate?: string;
+  events: Event[];
 }

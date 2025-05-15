@@ -21,6 +21,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { createMeetingSchema } from "@/validation/create-meeting";
+import { postEvent } from "@/api/events/post";
 
 export const Route = createFileRoute("/groups/$id/$topicId")({
   component: RouteComponent,
@@ -49,6 +50,7 @@ function RouteComponent() {
   const client = useStreamVideoClient();
   const [openUpdateTopic, setOpenUpdateTopic] = useState<boolean>(false);
   const [openCreateMeeting, setOpenCreateMeeting] = useState<boolean>(false);
+  const [isReccuring, setIsRecurring] = useState<boolean>(false);
   const [errorFields, setErrorFields] = useState<string[]>([]);
 
   const handleOpenUpdateTopic = () => setOpenUpdateTopic(true);
@@ -56,6 +58,8 @@ function RouteComponent() {
 
   const handleOpenCreateMeeting = () => setOpenCreateMeeting(true);
   const handleCloseCreateMeeting = () => setOpenCreateMeeting(false);
+
+  const meetingEvent = topic.events.find((event) => event.type === "meeting");
 
   async function commentFormAction(formData: FormData) {
     const formValues = createCommentSchema.safeParse(
@@ -107,7 +111,7 @@ function RouteComponent() {
     const formValues = createMeetingSchema.safeParse(
       Object.fromEntries(formData)
     );
-    console.log(formValues);
+    console.log(formValues.error);
     if (formValues.success) {
       if (!client) {
         return;
@@ -124,14 +128,23 @@ function RouteComponent() {
         },
       });
 
-      const res = await updateTopic({
-        id: topic.id,
-        meetingId: id,
-        meetingFirstDate: new Date(formValues.data.dateTime).toISOString(),
-        recurring: formValues.data.recurring,
+      const eventRes = await postEvent({
+        date: formValues.data.date,
+        topicId: topic.id,
+        type: "meeting",
+        description: topic.name,
+        recurring: isReccuring,
+        recurringRule: formValues.data.recurringRule
+          ? parseInt(formValues.data.recurringRule)
+          : undefined,
       });
 
-      if (res.success) {
+      const updateTopicRes = await updateTopic({
+        id: topic.id,
+        meetingId: id,
+      });
+
+      if (updateTopicRes.success && eventRes.success) {
         setOpenCreateMeeting(false);
         navigate({
           to: "/groups/$id/$topicId",
@@ -173,7 +186,7 @@ function RouteComponent() {
       <div className="pl-4 w-[60%] mb-8">
         <span className="text-xl/relaxed">
           {topic.description ?? "No description provided"}
-          {topic.meetingId && (
+          {topic.meetingId && meetingEvent && (
             <>
               <br />
               <br />
@@ -184,7 +197,7 @@ function RouteComponent() {
                 <span className="text-blue-700 underline">
                   Мітинг заплановано на{" "}
                   {new Date(
-                    topic.meetingFirstDate as string
+                    meetingEvent.date as string
                   ).toLocaleDateString("uk-UA", {
                     year: "numeric",
                     month: "2-digit",
@@ -280,16 +293,33 @@ function RouteComponent() {
           <span className="text-3xl font-semibold">Параметри зустрічі</span>
           <div>
             <div className="flex gap-3 content-center">
-              <input name="recurring" type="checkbox" />
+              <input
+                name="recurring"
+                type="checkbox"
+                onChange={() => setIsRecurring(!isReccuring)}
+              />
               <label htmlFor="recurring">Зустрі повторюється</label>
             </div>
           </div>
+          {isReccuring && (
+            <div>
+              <div className="flex gap-3 content-center">
+                <span>Зустріч повторюється кожні </span>
+                <input
+                  name="recurringRule"
+                  type="number"
+                  className="inline w-20"
+                />
+                <span>днів</span>
+              </div>
+            </div>
+          )}
           <div>
             <div className="flex flex-col gap-1">
-              <label htmlFor="dateTime">Дата зустрічі: </label>
+              <label htmlFor="date">Дата зустрічі: </label>
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DemoContainer components={["DateTimePicker"]}>
-                  <DateTimePicker name="dateTime" />
+                  <DateTimePicker name="date" />
                 </DemoContainer>
               </LocalizationProvider>
             </div>

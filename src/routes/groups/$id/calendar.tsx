@@ -86,7 +86,7 @@ function RouteComponent() {
             <span>{capitalizeFirstLetter(day)}</span>
           </div>
         ))}
-        {nonMonthDays.map((item) => (
+        {nonMonthDays.map(() => (
           <div></div>
         ))}
         {daysInMonth.map((date) => (
