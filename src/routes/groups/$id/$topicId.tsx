@@ -60,6 +60,7 @@ function RouteComponent() {
   const handleCloseCreateMeeting = () => setOpenCreateMeeting(false);
 
   const meetingEvent = topic.events.find((event) => event.type === "meeting");
+  const deadlineEvent = topic.events.find((event) => event.type === "deadline");
 
   async function commentFormAction(formData: FormData) {
     const formValues = createCommentSchema.safeParse(
@@ -196,9 +197,7 @@ function RouteComponent() {
               >
                 <span className="text-blue-700 underline">
                   Мітинг заплановано на{" "}
-                  {new Date(
-                    meetingEvent.date as string
-                  ).toLocaleDateString("uk-UA", {
+                  {new Date(meetingEvent.date).toLocaleDateString("uk-UA", {
                     year: "numeric",
                     month: "2-digit",
                     day: "2-digit",
@@ -208,6 +207,24 @@ function RouteComponent() {
                   })}
                 </span>
               </Link>
+            </>
+          )}
+          {deadlineEvent && (
+            <>
+              {" "}
+              <br /> <br />
+              <span className="font-bold">
+                Тема дійсна до{" "}
+                {new Date(deadlineEvent.date).toLocaleDateString("uk-UA", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                })}
+                !
+              </span>
             </>
           )}
         </span>

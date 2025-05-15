@@ -2,7 +2,9 @@ import type { ApiResponse } from "@/utils/types/response-template";
 import { axiosInstance } from "../instance";
 import type { Topic } from "./entity";
 
-type PostTopic = Omit<Topic, "id" | "created" | "groupId">;
+type PostTopic = Omit<Topic, "id" | "created" | "groupId" | "events"> & {
+  deadline?: string;
+};
 
 export const postTopic = async (data: PostTopic) => {
   const res = (

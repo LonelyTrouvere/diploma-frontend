@@ -5,6 +5,10 @@ import { postTopic } from "@/api/topics/post";
 import { useCurrentUser } from "@/utils/context/user-context";
 import { createTopicSchema } from "@/validation/create-topic-schema";
 import { Modal } from "@mui/material";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -103,6 +107,16 @@ function RouteComponent() {
                 type="text"
                 placeholder="Введіть..."
               />
+            </div>
+          </div>
+          <div>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="date">Додати дедлайн: </label>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DemoContainer components={["DateTimePicker"]}>
+                  <DateTimePicker name="deadline" />
+                </DemoContainer>
+              </LocalizationProvider>
             </div>
           </div>
           <div>
