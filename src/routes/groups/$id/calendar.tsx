@@ -3,30 +3,53 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   add,
   eachDayOfInterval,
+  endOfDay,
   endOfMonth,
   endOfWeek,
   format,
   getDay,
   getYear,
+  isAfter,
+  isBefore,
   isEqual,
   startOfDay,
   startOfMonth,
   startOfWeek,
   sub,
 } from "date-fns";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import { IconButton, Paper } from "@mui/material";
 import { uk } from "date-fns/locale";
 import { capitalizeFirstLetter } from "@/utils/helpers/capitalize";
+import type { Event } from "@/api/events/entity";
+import { getEvents } from "@/api/events/get";
 
 export const Route = createFileRoute("/groups/$id/calendar")({
   component: RouteComponent,
 });
 
+const colorStyles = {
+  meeting: "oklch(80.9% 0.105 251.813)",
+  deadline: "#7bf1a8",
+};
+
 function RouteComponent() {
+  const [events, setEvents] = useState<Event[]>([]);
   const [month, setMonth] = useState<Date>(new Date());
+
+  useEffect(() => {
+    getEvents({
+      after: startOfMonth(month).toISOString(),
+      before: endOfMonth(month).toISOString(),
+    }).then((data) => {
+      if (data.success) {
+        setEvents(data.data);
+      }
+    });
+  }, [month]);
+
   const firstDateOfMonth = startOfMonth(month);
   const lastDayOfMonth = endOfMonth(month);
   const nonMonthDays =
@@ -38,11 +61,26 @@ function RouteComponent() {
     end: lastDayOfMonth,
   });
 
+  const recuringEvents: Event[] = [];
+  for (const ev of events) {
+    if (ev.recurring) {
+      let recuringDateStart = new Date(ev.date);
+      while (isBefore(recuringDateStart, lastDayOfMonth)) {
+        recuringDateStart = add(recuringDateStart, { days: ev.recurringRule });
+        if (isAfter(recuringDateStart, firstDateOfMonth) && isBefore(recuringDateStart, lastDayOfMonth)) {
+          recuringEvents.push({
+            ...ev,
+            date: recuringDateStart.toISOString(),
+          });
+        }
+      }
+    }
+  }
+
   const daysOfWeek = eachDayOfInterval({
     start: startOfWeek(new Date(), { weekStartsOn: 1 }),
     end: endOfWeek(new Date(), { weekStartsOn: 1 }),
   });
-
   const DAYS_OF_WEEK = daysOfWeek.map((day) =>
     format(day, "EEEE", { locale: uk })
   );
@@ -94,7 +132,45 @@ function RouteComponent() {
             className="p-2 calendar-cell rounded-md min-h-20 relative"
             id={isEqual(startOfDay(new Date()), date) ? "today" : undefined}
           >
-            <span>{format(date, "d")}</span>
+            <div className="mb-2">
+              <span>{format(date, "d")}</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              {events.map((event) => {
+                if (
+                  isAfter(new Date(event.date), date) &&
+                  isBefore(new Date(event.date), endOfDay(date))
+                ) {
+                  return (
+                    <span
+                      className="text-xs px-2 py-1 rounded-3xl"
+                      style={{ backgroundColor: colorStyles[event.type] }}
+                    >
+                      {event.description}
+                    </span>
+                  );
+                } else {
+                  return <></>;
+                }
+              })}
+              {recuringEvents.map((event) => {
+                if (
+                  isAfter(new Date(event.date), date) &&
+                  isBefore(new Date(event.date), endOfDay(date))
+                ) {
+                  return (
+                    <span
+                      className="text-xs px-2 py-1 rounded-3xl"
+                      style={{ backgroundColor: colorStyles[event.type] }}
+                    >
+                      {event.description}
+                    </span>
+                  );
+                } else {
+                  return <></>;
+                }
+              })}
+            </div>
           </Paper>
         ))}
       </div>
