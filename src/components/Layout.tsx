@@ -16,22 +16,22 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   const ROUTES_GUEST: Route[] = [
     {
-      name: "Login",
+      name: "Увійти",
       href: "/login",
     },
     {
-      name: "Sign up",
+      name: "Зареєструватись",
       href: "/signup",
     },
   ];
 
   const ROUTES_USER: Route[] = [
     {
-      name: "Groups",
+      name: "Групи",
       href: "/groups",
     },
     {
-      name: "Log out",
+      name: "Вийти",
       href: "/logout",
       action: async () => {
         const res = await logout();
@@ -45,27 +45,27 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   const ROUTES_GROUP: Route[] = [
     {
-      name: "Groups",
+      name: "Групи",
       href: "/groups",
     },
     {
-      name: "Main",
+      name: "Теми",
       href: `/groups/${currentUser?.groups?.id}`,
     },
     {
-      name: "Chat",
+      name: "Чат",
       href: `/groups/${currentUser?.groups?.id}/chat`,
     },
     {
-      name: "Calendar",
+      name: "Календар",
       href: `/groups/${currentUser?.groups?.id}/calendar`,
     },
     {
-      name: "Settings",
+      name: "Налаштування",
       href: `/groups/${currentUser?.groups?.id}/settings`,
     },
     {
-      name: "Log out",
+      name: "Вийти",
       href: "/logout",
       action: async () => {
         const res = await logout();
