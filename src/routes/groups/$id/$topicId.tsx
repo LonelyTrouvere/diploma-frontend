@@ -11,9 +11,12 @@ import CallIcon from "@mui/icons-material/Call";
 import { createCommentSchema } from "@/validation/create-comment";
 import { postComment } from "@/api/comments/post";
 import { deleteTopic } from "@/api/topics/delete";
-import { useStreamVideoClient } from "@stream-io/video-react-sdk";
+import {
+  useStreamVideoClient,
+  type ListRecordingsResponse,
+} from "@stream-io/video-react-sdk";
 import { getGroupParticipants } from "@/api/users/get-participants";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { updateTopic } from "@/api/topics/update";
 import { updateTopicSchema } from "@/validation/update-topic-schema";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
@@ -48,10 +51,21 @@ function RouteComponent() {
   const { currentUser } = useCurrentUser();
   const navigate = Route.useNavigate();
   const client = useStreamVideoClient();
+  const [callRecordings, setCallRecordings] =
+    useState<ListRecordingsResponse | null>(null);
   const [openUpdateTopic, setOpenUpdateTopic] = useState<boolean>(false);
   const [openCreateMeeting, setOpenCreateMeeting] = useState<boolean>(false);
   const [isReccuring, setIsRecurring] = useState<boolean>(false);
   const [errorFields, setErrorFields] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (client && topic.meetingId) {
+      const call = client.call("default", topic.meetingId);
+      call.queryRecordings().then((data) => {
+        setCallRecordings(data);
+      });
+    }
+  }, [client]);
 
   const handleOpenUpdateTopic = () => setOpenUpdateTopic(true);
   const handleCloseUpdateTopuc = () => setOpenUpdateTopic(false);
@@ -114,7 +128,7 @@ function RouteComponent() {
     );
     console.log(formValues.error);
     if (formValues.success) {
-      if (!client) {
+      if (!client || topic.meetingId) {
         return;
       }
 
@@ -207,6 +221,32 @@ function RouteComponent() {
                   })}
                 </span>
               </Link>
+            </>
+          )}
+          {callRecordings && callRecordings.recordings.length > 0 && (
+            <>
+              <br />
+              <br />
+              <span className="font-bold">Записи дзвінку</span>
+              <ol className="ml-3">
+                {callRecordings.recordings.map((recoding) => (
+                  <li className="text-blue-700 underline">
+                    <Link to={recoding.url}>
+                      {new Date(recoding.start_time).toLocaleDateString(
+                        "uk-UA",
+                        {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                        }
+                      )}
+                    </Link>
+                  </li>
+                ))}
+              </ol>
             </>
           )}
           {deadlineEvent && (
