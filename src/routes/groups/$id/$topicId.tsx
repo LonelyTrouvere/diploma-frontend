@@ -8,6 +8,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SendIcon from "@mui/icons-material/Send";
 import CallIcon from "@mui/icons-material/Call";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { createCommentSchema } from "@/validation/create-comment";
 import { postComment } from "@/api/comments/post";
 import { deleteTopic } from "@/api/topics/delete";
@@ -16,7 +17,7 @@ import {
   type ListRecordingsResponse,
 } from "@stream-io/video-react-sdk";
 import { getGroupParticipants } from "@/api/users/get-participants";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { updateTopic } from "@/api/topics/update";
 import { updateTopicSchema } from "@/validation/update-topic-schema";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
@@ -28,6 +29,8 @@ import { postEvent } from "@/api/events/post";
 import { getAttachments } from "@/api/attachments/get-attachments";
 import { getFile } from "@/api/attachments/get-file";
 import type { Attachment } from "@/api/attachments/entity";
+import { postFiles } from "@/api/attachments/upload-files";
+import { attachFiles } from "@/api/attachments/attach-files";
 
 export const Route = createFileRoute("/groups/$id/$topicId")({
   component: RouteComponent,
@@ -54,6 +57,19 @@ const StyledIconButton = styled(IconButton)(() => ({
   },
 }));
 
+const VisuallyHiddenInput = styled("input")({
+  zIndex: 100,
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
+  height: "100%",
+  overflow: "hidden",
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  whiteSpace: "nowrap",
+  width: "100%",
+});
+
 function RouteComponent() {
   const { topic, participants, attachments } = Route.useLoaderData();
   const { currentUser } = useCurrentUser();
@@ -65,6 +81,7 @@ function RouteComponent() {
   const [openCreateMeeting, setOpenCreateMeeting] = useState<boolean>(false);
   const [isReccuring, setIsRecurring] = useState<boolean>(false);
   const [errorFields, setErrorFields] = useState<string[]>([]);
+  const inputFile = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (client && topic.meetingId) {
@@ -191,6 +208,41 @@ function RouteComponent() {
     await getFile(fileData);
   }
 
+  async function onFileUpload(event: ChangeEvent<HTMLInputElement>) {
+    const fileList = event.target.files;
+    if (fileList && fileList.length > 0) {
+      const data = new FormData();
+      let i = 0;
+      for (const file of fileList) {
+        data.append(`file${i}`, file);
+        i++;
+      }
+
+      const uploadRes = await postFiles(data);
+      if (uploadRes.success) {
+        const attachments: Attachment[] = [];
+        for (let i = 0; i < fileList.length; i++) {
+          const file = fileList.item(i);
+          if (file) {
+            attachments.push({
+              extension: file.name.match(/\.([0-9a-z]+)(?:[\?#]|$)/i)![1],
+              name: file.name,
+              topicId: topic.id,
+              id: uploadRes.data[i],
+            });
+          }
+        }
+        const attachRes = await attachFiles(attachments);
+        if (attachRes.success) {
+          navigate({
+            to: "/groups/$id/$topicId",
+            params: { id: currentUser?.groups?.id, topicId: topic.id },
+          });
+        }
+      }
+    }
+  }
+
   return (
     <div className="w-[100%] px-16 py-10">
       <div className="flex justify-between content-center mb-8 gap-2">
@@ -200,6 +252,15 @@ function RouteComponent() {
             {" "}
             <IconButton onClick={handleOpenUpdateTopic}>
               <EditIcon />
+            </IconButton>
+            <IconButton onClick={() => inputFile.current?.click()}>
+              <CloudUploadIcon />
+              <VisuallyHiddenInput
+                type="file"
+                ref={inputFile}
+                onChange={onFileUpload}
+                multiple
+              />
             </IconButton>
             <IconButton onClick={handleOpenCreateMeeting}>
               <CallIcon />
@@ -220,7 +281,10 @@ function RouteComponent() {
               <span className="font-bold">До теми прикріплено файли </span>
               <div className="ml-3">
                 {attachments.map((attachment) => (
-                  <span className="text-blue-700 underline cursor-pointer block" onClick={() => onGetFile(attachment)}>
+                  <span
+                    className="text-blue-700 underline cursor-pointer block"
+                    onClick={() => onGetFile(attachment)}
+                  >
                     {`${attachment.name}.${attachment.extension}`}
                   </span>
                 ))}
