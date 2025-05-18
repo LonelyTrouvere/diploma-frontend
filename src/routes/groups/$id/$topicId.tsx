@@ -25,16 +25,24 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { createMeetingSchema } from "@/validation/create-meeting";
 import { postEvent } from "@/api/events/post";
+import { getAttachments } from "@/api/attachments/get-attachments";
+import { getFile } from "@/api/attachments/get-file";
+import type { Attachment } from "@/api/attachments/entity";
 
 export const Route = createFileRoute("/groups/$id/$topicId")({
   component: RouteComponent,
   loader: async (data) => {
     const topic = await getTopic(data.params.topicId);
     const participants = await getGroupParticipants();
-    if (!topic.success || !participants.success) {
+    const attachments = await getAttachments({ topicId: data.params.topicId });
+    if (!topic.success || !participants.success || !attachments.success) {
       throw notFound();
     }
-    return { topic: topic.data, participants: participants.data };
+    return {
+      topic: topic.data,
+      participants: participants.data,
+      attachments: attachments.data,
+    };
   },
 });
 
@@ -47,7 +55,7 @@ const StyledIconButton = styled(IconButton)(() => ({
 }));
 
 function RouteComponent() {
-  const { topic, participants } = Route.useLoaderData();
+  const { topic, participants, attachments } = Route.useLoaderData();
   const { currentUser } = useCurrentUser();
   const navigate = Route.useNavigate();
   const client = useStreamVideoClient();
@@ -179,6 +187,10 @@ function RouteComponent() {
     }
   }
 
+  async function onGetFile(fileData: Attachment) {
+    await getFile(fileData);
+  }
+
   return (
     <div className="w-[100%] px-16 py-10">
       <div className="flex justify-between content-center mb-8 gap-2">
@@ -201,6 +213,20 @@ function RouteComponent() {
       <div className="pl-4 w-[60%] mb-8">
         <span className="text-xl/relaxed">
           {topic.description ?? "No description provided"}
+          {attachments.length > 0 && (
+            <>
+              <br />
+              <br />
+              <span className="font-bold">До теми прикріплено файли </span>
+              <div className="ml-3">
+                {attachments.map((attachment) => (
+                  <span className="text-blue-700 underline cursor-pointer block" onClick={() => onGetFile(attachment)}>
+                    {`${attachment.name}.${attachment.extension}`}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
           {topic.meetingId && meetingEvent && (
             <>
               <br />
