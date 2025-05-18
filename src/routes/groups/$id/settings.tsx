@@ -5,8 +5,12 @@ import { updateGroupSchema } from "@/validation/update-group-schema";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { getGroupParticipants } from "@/api/users/get-participants";
 import {
+  FormControl,
   IconButton,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
   styled,
   Table,
   TableBody,
@@ -20,6 +24,9 @@ import AcceptIcon from "@mui/icons-material/Done";
 import { getJoinRequests } from "@/api/groups/joinRequestsList";
 import { acceptRequest } from "@/api/groups/accept-request";
 import { declineRequest } from "@/api/groups/decline-request";
+import { useState } from "react";
+import { changeRole } from "@/api/groups/change-role";
+import type { USER_ROLE } from "@/api/groups/entity";
 
 export const Route = createFileRoute("/groups/$id/settings")({
   component: RouteComponent,
@@ -136,12 +143,38 @@ function RouteComponent() {
                   <TableCell>Дата приєднання</TableCell>
                 </StyledTableRow>
               </TableHead>
-              <TableBody>
+              <TableBody className="py-1">
                 {participants.map((participant) => (
                   <TableRow key={participant.id}>
                     <TableCell>{participant.name}</TableCell>
                     <TableCell>{participant.email}</TableCell>
-                    <TableCell>{participant.role.toUpperCase()}</TableCell>
+                    <FormControl fullWidth>
+                      <InputLabel id="demo-simple-select-label">
+                        Role
+                      </InputLabel>
+                      <Select
+                        labelId="demo-simple-select-label"
+                        id="demo-simple-select"
+                        label="Role"
+                        value={participant.role}
+                        onChange={async (e) => {
+                          const res = await changeRole({
+                            role: e.target
+                              .value as (typeof USER_ROLE)[keyof typeof USER_ROLE],
+                            userId: participant.id,
+                          });
+                          if (res.success) {
+                            navigate({
+                              to: `/groups/${currentUser?.groups?.id}/settings`,
+                            });
+                          }
+                        }}
+                      >
+                        <MenuItem value={"participant"}>Participant</MenuItem>
+                        <MenuItem value={"admin"}>Admin</MenuItem>
+                        <MenuItem value={"owner"}>Owner</MenuItem>
+                      </Select>
+                    </FormControl>
                     <TableCell>
                       {new Date(participant.joined).toLocaleDateString(
                         "uk-UA",
