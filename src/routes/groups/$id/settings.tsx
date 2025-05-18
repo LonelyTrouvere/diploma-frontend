@@ -24,7 +24,6 @@ import AcceptIcon from "@mui/icons-material/Done";
 import { getJoinRequests } from "@/api/groups/joinRequestsList";
 import { acceptRequest } from "@/api/groups/accept-request";
 import { declineRequest } from "@/api/groups/decline-request";
-import { useState } from "react";
 import { changeRole } from "@/api/groups/change-role";
 import type { USER_ROLE } from "@/api/groups/entity";
 
