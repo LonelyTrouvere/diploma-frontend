@@ -83,7 +83,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       : ROUTES_GUEST;
 
   return (
-    <div id="app__layout" className="flex">
+    <div id="app__layout" className="flex bg-teal-50">
       <nav
         id="app__navigation"
         className="w-48 h-screen fixed shadow-2xl flex flex-col bg-fuchsia-50"

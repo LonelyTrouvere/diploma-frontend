@@ -80,7 +80,7 @@ function GroupsPage() {
         {groups.map((group) => (
             <div
               key={group.id}
-              className="group-name h-16 rounded-xl text-xl flex justify-center content-evenly py-2 px-4 hover:bg-fuchsia-200"
+              className="group-name h-16 rounded-xl text-xl flex justify-center content-evenly py-2 px-4 bg-fuchsia-100 hover:bg-fuchsia-200"
               onClick={() => onLoginGroup(group.id)}
             >
               {group.name}
