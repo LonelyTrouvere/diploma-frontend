@@ -226,7 +226,7 @@ function RouteComponent() {
           if (file) {
             attachments.push({
               extension: file.name.match(/\.([0-9a-z]+)(?:[\?#]|$)/i)![1],
-              name: file.name,
+              name: file.name.match(/^(.+?)(?:\.[^\.\/\\]+)?$/)![1],
               topicId: topic.id,
               id: uploadRes.data[i],
             });
@@ -317,7 +317,7 @@ function RouteComponent() {
             <>
               <br />
               <br />
-              <span className="font-bold">Записи дзвінку</span>
+              <span className="font-bold">Записи конференції</span>
               <ol className="ml-3">
                 {callRecordings.recordings.map((recoding) => (
                   <li className="text-blue-700 underline">

@@ -27,7 +27,7 @@ function Signup() {
   return (
     <div
       id="login-page"
-      className="w-[100%] h-[100%] flex justify-center content-center"
+      className="w-[100%] h-[100%] flex justify-center content-center py-32"
     >
       <form
         id="login-page__form"

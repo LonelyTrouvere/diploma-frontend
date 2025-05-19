@@ -100,7 +100,7 @@ function RouteComponent() {
           <span className="text-3xl font-semibold">Створити нову тему</span>
           <div>
             <div className="flex flex-col gap-1">
-              <label htmlFor="name">Ім'я: </label>
+              <label htmlFor="name">Назва: </label>
               <input
                 name="name"
                 className={errorFields.includes("name") ? "error-field" : ""}

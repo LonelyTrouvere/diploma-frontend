@@ -53,7 +53,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       href: `/groups/${currentUser?.groups?.id}`,
     },
     {
-      name: "Чат",
+      name: "Месенджер",
       href: `/groups/${currentUser?.groups?.id}/chat`,
     },
     {
